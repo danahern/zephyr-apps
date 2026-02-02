@@ -1,0 +1,8 @@
+# Zephyr build dependencies
+west>=1.2.0
+
+# Additional Zephyr Python dependencies will be installed via:
+# pip install -r zephyr/scripts/requirements.txt
+
+# Tools dependencies
+bleak>=0.21.0

@@ -1,0 +1,43 @@
+# Kconfig for BLE WiFi Bridge
+
+menu "BLE WiFi Bridge Configuration"
+
+config BRIDGE_WIFI_SSID
+    string "WiFi SSID"
+    default "MyNetwork"
+    help
+      WiFi network SSID to connect to.
+
+config BRIDGE_WIFI_PSK
+    string "WiFi Password"
+    default "password123"
+    help
+      WiFi network password.
+
+config BRIDGE_TCP_SERVER_ADDR
+    string "TCP Server Address"
+    default "192.168.1.100"
+    help
+      IP address of the TCP server to connect to.
+
+config BRIDGE_TCP_SERVER_PORT
+    int "TCP Server Port"
+    default 4242
+    help
+      Port number of the TCP server.
+
+config BRIDGE_QUEUE_SIZE
+    int "Bridge Message Queue Size"
+    default 8
+    help
+      Number of messages that can be queued between BLE and WiFi.
+
+config BRIDGE_MSG_MAX_SIZE
+    int "Maximum Message Size"
+    default 256
+    help
+      Maximum size of a single message in bytes.
+
+endmenu
+
+source "Kconfig.zephyr"

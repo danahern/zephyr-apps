@@ -1,0 +1,27 @@
+# Build artifacts
+/build/
+**/build/
+
+# Python virtual environment
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Compiled files
+*.o
+*.a
+*.elf
+*.bin
+*.hex
+*.map
