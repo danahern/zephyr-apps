@@ -1,0 +1,6 @@
+name: device_shell
+description: "Board info shell commands (board info/uptime/reset)"
+default_overlays:
+  - device_shell.conf
+board_overlays: false
+depends: []

@@ -1,0 +1,7 @@
+name: crash_log
+description: "Boot-time coredump detection and shell commands"
+default_overlays:
+  - conf/debug_base.conf
+  - conf/debug_coredump_flash.conf
+board_overlays: true
+depends: []
