@@ -1,2 +1,3 @@
 rsource "crash_log/Kconfig"
 rsource "device_shell/Kconfig"
+rsource "eai_osal/Kconfig"

@@ -1,0 +1,24 @@
+menuconfig EAI_OSAL
+	bool "EAI OSAL - OS Abstraction Layer"
+	help
+	  Portable OS abstraction layer providing thread, mutex, semaphore,
+	  queue, timer, event, critical section, and time primitives.
+	  Backend is selected at compile time via Kconfig.
+
+if EAI_OSAL
+
+choice EAI_OSAL_BACKEND
+	prompt "OSAL Backend"
+	default EAI_OSAL_BACKEND_ZEPHYR
+
+config EAI_OSAL_BACKEND_ZEPHYR
+	bool "Zephyr backend"
+	depends on MULTITHREADING
+	select EVENTS
+	help
+	  Use Zephyr RTOS kernel primitives as the OSAL backend.
+	  Requires CONFIG_NUM_PREEMPT_PRIORITIES >= 32.
+
+endchoice
+
+endif # EAI_OSAL

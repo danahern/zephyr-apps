@@ -1,0 +1,3 @@
+name: eai_osal
+description: "OS abstraction layer for multi-RTOS portability"
+depends: []

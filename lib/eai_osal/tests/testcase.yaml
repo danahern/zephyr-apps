@@ -1,0 +1,7 @@
+common:
+  tags:
+    - eai_osal
+tests:
+  libraries.eai_osal:
+    integration_platforms:
+      - qemu_cortex_m3
