@@ -83,7 +83,7 @@ Key principles:
 1. **Modular apps** - Copy structure from `ble_wifi_bridge` (CMakeLists.txt with multiple source files, Kconfig for parameters)
 2. **Simple apps** - Copy from `ble_data_transfer` (single main.c)
 3. Always include: `CMakeLists.txt`, `prj.conf`, `Kconfig` (if configurable)
-4. Put build output in `apps/<app>/build/` (use `-d` flag)
+4. Build output goes to `apps/<app>/build/` automatically (zephyr-build MCP passes `-d`)
 
 ## Environment
 
@@ -103,14 +103,7 @@ west blobs fetch hal_espressif
 
 ## Board Configurations
 
-| Board | Chip | target_chip | Use Case |
-|-------|------|-------------|----------|
-| nrf52840dk/nrf52840 | nRF52840 | nRF52840_xxAA | BLE development |
-| esp32s3_eye/esp32s3/procpu | ESP32-S3 | ESP32-S3 | WiFi + BLE |
-| esp32_devkitc/esp32/procpu | ESP32 | ESP32 | WiFi + BLE |
-| nrf5340dk/nrf5340/cpuapp | nRF5340 | nRF5340_xxAA | BLE + net core |
-| nrf54l15dk/nrf54l15/cpuapp | nRF54L15 | nrf54l15 | Crash debug, low-power BLE |
-| native_sim | - | - | Unit testing |
+See workspace `CLAUDE.md` for full board/chip/target_chip mappings. App-specific boards are listed in the Available Apps table above.
 
 ## Shared Libraries
 
