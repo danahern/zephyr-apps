@@ -120,7 +120,7 @@ Each library has its own `CLAUDE.md` with full usage docs. Read it before using.
 Run all tests via twister:
 
 ```bash
-python3 ../zephyr/scripts/twister -T tests -p qemu_cortex_m3 -v
+python3 ../zephyr/scripts/twister -T lib -p qemu_cortex_m3 -O ../.cache/twister -v
 ```
 
 | Test Suite | Platform | Tests |
@@ -132,6 +132,6 @@ python3 ../zephyr/scripts/twister -T tests -p qemu_cortex_m3 -v
 
 - `apps/` - Application projects
 - `lib/` - Shared libraries (each with its own CLAUDE.md)
-- `tests/` - Unit tests (run via twister on QEMU)
+- `lib/<name>/tests/` - Unit tests co-located with libraries (run via twister on QEMU)
 - `boards/` - Custom board definitions (future)
 - `drivers/` - Custom drivers (future)
