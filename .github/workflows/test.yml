@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+
+jobs:
+  twister:
+    name: Library Tests
+    runs-on: ubuntu-latest
+    container: ghcr.io/zephyrproject-rtos/ci:v0.28.7
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache west modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            bootloader
+            modules
+            tools
+            zephyr
+          key: west-${{ hashFiles('west.yml') }}
+          restore-keys: west-
+
+      - name: West init and update
+        run: |
+          west init -l .
+          west update --narrow --fetch-opt=--depth=1
+
+      - name: Run twister
+        run: |
+          west twister -T lib -p qemu_cortex_m3 -v --inline-logs -O /tmp/twister-out
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twister-results
+          path: /tmp/twister-out/twister.xml
+          retention-days: 30
