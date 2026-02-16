@@ -70,6 +70,11 @@ static ssize_t write_credentials(struct bt_conn *conn,
 				 const void *buf, uint16_t len,
 				 uint16_t offset, uint8_t flags)
 {
+	/* Prepare write validation — accept without processing */
+	if (flags & BT_GATT_WRITE_FLAG_PREPARE) {
+		return 0;
+	}
+
 	struct wifi_prov_cred cred = {0};
 
 	if (wifi_prov_msg_decode_credentials(buf, len, &cred) < 0) {
@@ -154,10 +159,10 @@ BT_GATT_SERVICE_DEFINE(wifi_prov_svc,
 	BT_GATT_CCC(scan_res_ccc_changed,
 		     BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 
-	/* Credentials: Write */
+	/* Credentials: Write (prepare write needed for payloads > ATT MTU) */
 	BT_GATT_CHARACTERISTIC(BT_UUID_WIFI_PROV_CRED,
 			       BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE,
+			       BT_GATT_PERM_WRITE | BT_GATT_PERM_PREPARE_WRITE,
 			       NULL, write_credentials, NULL),
 
 	/* Status: Read + Notify */
@@ -235,7 +240,7 @@ int wifi_prov_ble_start_advertising(void)
 	int err = bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ad, ARRAY_SIZE(ad),
 				  sd, ARRAY_SIZE(sd));
 	if (err) {
-		LOG_ERR("Advertising failed (err %d)", err);
+		LOG_WRN("Advertising start skipped (err %d)", err);
 		return err;
 	}
 

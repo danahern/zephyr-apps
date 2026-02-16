@@ -1,5 +1,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/settings/settings.h>
 #include <string.h>
 
 #include <wifi_prov/wifi_prov.h>
@@ -8,6 +9,65 @@
 LOG_MODULE_DECLARE(wifi_prov, LOG_LEVEL_INF);
 
 static uint8_t cached_ip[4];
+
+/* Deferred credential processing — BLE GATT callbacks must not block */
+static struct wifi_prov_cred pending_cred;
+static struct k_work cred_work;
+
+/* Deferred factory reset — BLE GATT callbacks must not block */
+static struct k_work factory_reset_work;
+
+/* Deferred auto-connect — WiFi driver needs time to initialize at boot */
+static struct k_work_delayable auto_connect_work;
+
+/* Forward declaration — defined in public API section below */
+int wifi_prov_factory_reset(void);
+
+static void factory_reset_handler(struct k_work *work)
+{
+	wifi_prov_factory_reset();
+}
+
+static void auto_connect_handler(struct k_work *work)
+{
+	struct wifi_prov_cred cred;
+	int ret;
+
+	ret = wifi_prov_cred_load(&cred);
+	if (ret) {
+		LOG_WRN("Auto-connect: failed to load credentials: %d", ret);
+		return;
+	}
+
+	LOG_INF("Auto-connecting from stored credentials");
+	wifi_prov_sm_process_event(WIFI_PROV_EVT_CREDENTIALS_RX);
+	wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_CONNECTING);
+	ret = wifi_prov_wifi_connect(&cred);
+	if (ret) {
+		LOG_WRN("Auto-connect request failed: %d", ret);
+		wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_FAILED);
+	}
+}
+
+static void cred_work_handler(struct k_work *work)
+{
+	int ret;
+
+	wifi_prov_cred_store(&pending_cred);
+	wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_CONNECTING);
+
+	ret = wifi_prov_wifi_connect(&pending_cred);
+	if (ret) {
+		LOG_ERR("WiFi connect request failed: %d", ret);
+		wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_FAILED);
+
+		uint8_t ip[4] = {0};
+
+		wifi_prov_ble_notify_status(wifi_prov_sm_get_state(), ip);
+	}
+	/* On success (ret==0), connection proceeds asynchronously.
+	 * on_wifi_state_changed() handles CONNECTED/FAILED events. */
+}
 
 /* --- Internal callbacks --- */
 
@@ -24,21 +84,9 @@ static void on_scan_trigger(void)
 
 static void on_credentials_received(const struct wifi_prov_cred *cred)
 {
-	int ret;
-
 	wifi_prov_sm_process_event(WIFI_PROV_EVT_CREDENTIALS_RX);
-	wifi_prov_cred_store(cred);
-	wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_CONNECTING);
-
-	ret = wifi_prov_wifi_connect(cred);
-	if (ret) {
-		LOG_ERR("WiFi connect failed: %d", ret);
-		wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_FAILED);
-
-		uint8_t ip[4] = {0};
-
-		wifi_prov_ble_notify_status(wifi_prov_sm_get_state(), ip);
-	}
+	pending_cred = *cred;
+	k_work_submit(&cred_work);
 }
 
 static void on_factory_reset_triggered(void);
@@ -69,6 +117,15 @@ int wifi_prov_init(void)
 	int ret;
 
 	wifi_prov_sm_init(on_state_changed);
+	k_work_init(&cred_work, cred_work_handler);
+	k_work_init(&factory_reset_work, factory_reset_handler);
+	k_work_init_delayable(&auto_connect_work, auto_connect_handler);
+
+	ret = settings_subsys_init();
+	if (ret) {
+		LOG_ERR("Settings init failed: %d", ret);
+		return ret;
+	}
 
 	ret = wifi_prov_wifi_init(on_wifi_state_changed);
 	if (ret) {
@@ -88,19 +145,8 @@ int wifi_prov_init(void)
 
 	if (IS_ENABLED(CONFIG_WIFI_PROV_AUTO_CONNECT) &&
 	    wifi_prov_cred_exists()) {
-		struct wifi_prov_cred cred;
-
-		ret = wifi_prov_cred_load(&cred);
-		if (ret == 0) {
-			LOG_INF("Auto-connecting from stored credentials");
-			wifi_prov_sm_process_event(WIFI_PROV_EVT_CREDENTIALS_RX);
-			wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_CONNECTING);
-			ret = wifi_prov_wifi_connect(&cred);
-			if (ret) {
-				LOG_WRN("Auto-connect failed: %d", ret);
-				wifi_prov_sm_process_event(WIFI_PROV_EVT_WIFI_FAILED);
-			}
-		}
+		/* Defer auto-connect to let WiFi driver finish initialization */
+		k_work_schedule(&auto_connect_work, K_SECONDS(2));
 	}
 
 	LOG_INF("WiFi provisioning initialized");
@@ -127,7 +173,7 @@ int wifi_prov_factory_reset(void)
 
 static void on_factory_reset_triggered(void)
 {
-	wifi_prov_factory_reset();
+	k_work_submit(&factory_reset_work);
 }
 
 enum wifi_prov_state wifi_prov_get_state(void)

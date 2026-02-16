@@ -10,9 +10,9 @@ LOG_MODULE_REGISTER(throughput, LOG_LEVEL_INF);
 #define CONFIG_THROUGHPUT_PORT 4242
 #endif
 
-#define STACK_SIZE 4096
+#define STACK_SIZE 8192
 #define THREAD_PRIORITY 7
-#define BUF_SIZE 4096
+#define BUF_SIZE 1024
 
 #define CMD_ECHO   0x01
 #define CMD_SINK   0x02

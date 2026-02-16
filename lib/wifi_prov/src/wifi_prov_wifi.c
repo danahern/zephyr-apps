@@ -19,8 +19,6 @@ static bool ip_obtained;
 static struct net_if *wifi_iface;
 static uint8_t current_ip[4];
 
-K_SEM_DEFINE(wifi_connect_sem, 0, 1);
-
 static void handle_wifi_scan_result(struct net_mgmt_event_callback *cb)
 {
 	const struct wifi_scan_result *entry =
@@ -73,12 +71,14 @@ static void handle_wifi_connect_result(struct net_mgmt_event_callback *cb)
 	if (status->status) {
 		LOG_ERR("WiFi connection failed: %d", status->status);
 		wifi_connected = false;
+		if (state_callback) {
+			state_callback(false);
+		}
 	} else {
 		LOG_INF("WiFi connected");
 		wifi_connected = true;
+		net_dhcpv4_start(wifi_iface);
 	}
-
-	k_sem_give(&wifi_connect_sem);
 }
 
 static void handle_wifi_disconnect_result(struct net_mgmt_event_callback *cb)
@@ -225,17 +225,6 @@ int wifi_prov_wifi_connect(const struct wifi_prov_cred *cred)
 		return ret;
 	}
 
-	ret = k_sem_take(&wifi_connect_sem, K_SECONDS(30));
-	if (ret) {
-		LOG_ERR("WiFi connection timeout");
-		return -ETIMEDOUT;
-	}
-
-	if (!wifi_connected) {
-		return -ECONNREFUSED;
-	}
-
-	net_dhcpv4_start(wifi_iface);
 	return 0;
 }
 

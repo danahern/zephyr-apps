@@ -18,7 +18,9 @@ static int cred_set(const char *name, size_t len, settings_read_cb read_cb,
 			return -EINVAL;
 		}
 		stored_cred.ssid_len = len;
-		return read_cb(cb_arg, stored_cred.ssid, len);
+		int rc = read_cb(cb_arg, stored_cred.ssid, len);
+
+		return rc < 0 ? rc : 0;
 	}
 
 	if (!strcmp(name, "psk")) {
@@ -26,14 +28,18 @@ static int cred_set(const char *name, size_t len, settings_read_cb read_cb,
 			return -EINVAL;
 		}
 		stored_cred.psk_len = len;
-		return read_cb(cb_arg, stored_cred.psk, len);
+		int rc = read_cb(cb_arg, stored_cred.psk, len);
+
+		return rc < 0 ? rc : 0;
 	}
 
 	if (!strcmp(name, "sec")) {
 		if (len != sizeof(uint8_t)) {
 			return -EINVAL;
 		}
-		return read_cb(cb_arg, &stored_cred.security, len);
+		int rc = read_cb(cb_arg, &stored_cred.security, len);
+
+		return rc < 0 ? rc : 0;
 	}
 
 	return -ENOENT;
