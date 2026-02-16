@@ -1,6 +1,6 @@
 # eai_osal
 
-OS abstraction layer providing portable primitives for multi-RTOS development. Phase 1 delivers the Zephyr backend with all core primitives.
+OS abstraction layer providing portable primitives for multi-RTOS development. Three backends: Zephyr, FreeRTOS (ESP-IDF), and POSIX (Linux/macOS).
 
 ## What It Does
 
@@ -29,7 +29,7 @@ Then include the umbrella header:
 
 Or include individual headers: `<eai_osal/mutex.h>`, `<eai_osal/thread.h>`, etc.
 
-## Kconfig Options
+## Kconfig Options (Zephyr/FreeRTOS)
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -38,6 +38,25 @@ Or include individual headers: `<eai_osal/mutex.h>`, `<eai_osal/thread.h>`, etc.
 | `CONFIG_NUM_PREEMPT_PRIORITIES` | (board default) | Must be >= 32 (enforced via BUILD_ASSERT) |
 
 The Zephyr backend auto-selects `CONFIG_EVENTS` and requires `CONFIG_MULTITHREADING`.
+
+## POSIX Backend (Native Tests)
+
+The POSIX backend enables running OSAL code natively on Linux/macOS without QEMU or hardware. Selected via `CONFIG_EAI_OSAL_BACKEND_POSIX` (set automatically by the native test CMakeLists.txt).
+
+```bash
+cd lib/eai_osal/tests/native
+cmake -B build && cmake --build build
+./build/osal_tests                             # 44 tests, <1s
+
+cmake -B build-san -DENABLE_SANITIZERS=ON      # ASan + UBSan
+cmake --build build-san && ./build-san/osal_tests
+```
+
+macOS compatibility notes:
+- No `pthread_mutex_timedlock` — uses trylock+sleep loop
+- No `sem_init` — uses mutex+condvar counting semaphore
+- No `timer_create` — uses dedicated timer threads
+- Condvar timeouts use `CLOCK_REALTIME` (macOS doesn't support `CLOCK_MONOTONIC` for condvars)
 
 ## API Reference
 
@@ -204,8 +223,14 @@ Tests use raw Zephyr threads for contention scenarios (don't test OSAL with itse
 
 ## Testing
 
+**Zephyr (QEMU):**
 ```
 zephyr-build.build(app="lib/eai_osal/tests", board="qemu_cortex_m3", pristine=true)
+```
+
+**Native (POSIX):**
+```bash
+cd lib/eai_osal/tests/native && cmake -B build && cmake --build build && ./build/osal_tests
 ```
 
 44 tests across 9 suites: mutex (6), semaphore (5), thread (4), queue (5), timer (5), event (5), critical (2), time (3), work (9).
@@ -229,7 +254,20 @@ lib/eai_osal/
 │   ├── internal.h          # Timeout/status conversion
 │   ├── mutex.c, semaphore.c, thread.c, queue.c
 │   ├── timer.c, event.c, critical.c, time.c, workqueue.c
+├── src/freertos/           # FreeRTOS backend (ESP-IDF)
+│   ├── types.h, internal.h
+│   ├── mutex.c, semaphore.c, thread.c, queue.c
+│   ├── timer.c, event.c, critical.c, time.c, workqueue.c
+├── src/posix/              # POSIX backend (Linux/macOS)
+│   ├── types.h             # pthread_mutex_t → eai_osal_mutex_t wrappers
+│   ├── internal.h          # osal_timespec() timeout helper
+│   ├── mutex.c, semaphore.c, thread.c, queue.c
+│   ├── timer.c, event.c, critical.c, time.c, workqueue.c
 └── tests/
     ├── CMakeLists.txt, prj.conf, testcase.yaml
-    └── src/main.c
+    ├── src/main.c                  # Zephyr ztest (44 tests)
+    └── native/                     # Standalone native tests
+        ├── CMakeLists.txt          # cmake -B build && cmake --build build
+        ├── main.c                  # Unity (44 tests, ported from ESP-IDF)
+        └── unity/                  # Vendored Unity v2.6.0
 ```

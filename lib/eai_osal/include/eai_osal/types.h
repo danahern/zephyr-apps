@@ -30,6 +30,8 @@ typedef void (*eai_osal_work_cb_t)(void *arg);
 #include "../../src/zephyr/types.h"
 #elif defined(CONFIG_EAI_OSAL_BACKEND_FREERTOS)
 #include "../../src/freertos/types.h"
+#elif defined(CONFIG_EAI_OSAL_BACKEND_POSIX)
+#include "../../src/posix/types.h"
 #else
 #error "No EAI OSAL backend selected"
 #endif
