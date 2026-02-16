@@ -28,6 +28,9 @@ jobs:
           key: west-${{ hashFiles('west.yml') }}
           restore-keys: west-
 
+      - name: Register Zephyr SDK CMake packages
+        run: /opt/toolchains/zephyr-sdk-*/setup.sh -c
+
       - name: West init and update
         run: |
           west init -l .
