@@ -21,6 +21,10 @@ Thumbs.db
 # Clangd cache
 .cache/
 
+# ESP-IDF generated config (track sdkconfig.defaults instead)
+sdkconfig
+sdkconfig.old
+
 # Local config (credentials, environment-specific settings)
 local.conf
 

@@ -46,7 +46,7 @@ static eai_osal_workqueue_t *get_sys_wq(void)
 		if (sys_wq._queue == NULL) {
 			return NULL;
 		}
-		BaseType_t ret = xTaskCreate(wq_task, "sys_wq", 2048,
+		BaseType_t ret = xTaskCreate(wq_task, "sys_wq", 4096,
 					     &sys_wq, tskIDLE_PRIORITY + 1,
 					     &sys_wq._task);
 		if (ret != pdPASS) {
