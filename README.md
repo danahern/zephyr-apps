@@ -409,7 +409,27 @@ Max latency:     45.67 ms
 
 Docker builds use the same Zephyr CI container as GitHub Actions — identical SDK, toolchain, and QEMU. Produces bit-for-bit reproducible binaries.
 
-**Prerequisites:** Docker Desktop installed and running. Then pull the image:
+**Prerequisites:** Docker Desktop installed and running.
+
+#### Install Docker
+
+**macOS:**
+```bash
+brew install --cask docker
+```
+Then launch Docker.app from Applications. Wait for the whale icon in the menu bar to show "Running".
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+# Log out and back in for group change to take effect
+```
+
+#### Pull the Zephyr CI image
+
 ```bash
 make pull
 # Or via workspace setup: ./setup.sh --with-docker
