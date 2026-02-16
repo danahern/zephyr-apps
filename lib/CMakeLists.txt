@@ -3,3 +3,4 @@
 add_subdirectory(crash_log)
 add_subdirectory(device_shell)
 add_subdirectory(eai_osal)
+add_subdirectory(wifi_prov)

@@ -1,0 +1,39 @@
+config WIFI_PROV
+	bool "WiFi provisioning library"
+	help
+	  WiFi provisioning over BLE. Provides a custom GATT service
+	  for scanning WiFi APs, sending credentials, and managing
+	  connection state. Credentials persist across reboots.
+
+config WIFI_PROV_BLE
+	bool "BLE GATT service for WiFi provisioning"
+	depends on WIFI_PROV
+	depends on BT
+	depends on BT_PERIPHERAL
+	help
+	  Custom BLE GATT service with characteristics for scan trigger,
+	  scan results, credentials, status, and factory reset.
+
+config WIFI_PROV_WIFI
+	bool "WiFi manager (scan/connect)"
+	depends on WIFI_PROV
+	depends on WIFI
+	depends on NETWORKING
+	help
+	  WiFi scanning and connection using Zephyr net_mgmt API.
+
+config WIFI_PROV_CRED
+	bool "Credential persistence via Settings"
+	depends on WIFI_PROV
+	depends on SETTINGS
+	default y if WIFI_PROV
+	help
+	  Store/load/erase WiFi credentials using Zephyr Settings subsystem.
+
+config WIFI_PROV_AUTO_CONNECT
+	bool "Auto-connect on boot from stored credentials"
+	depends on WIFI_PROV_WIFI
+	depends on WIFI_PROV_CRED
+	default y
+	help
+	  If stored credentials exist at boot, automatically connect to WiFi.

@@ -17,6 +17,7 @@ This loads guidelines for memory management, error handling, code organization, 
 | ble_data_transfer | nrf52840dk/nrf52840 | Simple BLE NUS echo server - receives data, echoes back with "Echo: " prefix |
 | ble_wifi_bridge | esp32s3_eye/esp32s3/procpu | BLE-to-TCP bridge - forwards BLE data over WiFi to a TCP server |
 | crash_debug | nrf54l15dk/nrf54l15/cpuapp | Crash debug demo - intentional HardFault with coredump analysis via MCP |
+| wifi_provision | nrf7002dk/nrf5340/cpuapp | WiFi provisioning over BLE with TCP throughput server |
 
 ## Building Apps
 
@@ -114,6 +115,7 @@ Each library has its own `CLAUDE.md` with full usage docs. Read it before using.
 | `lib/crash_log/` | Boot-time coredump detection, shell commands (`crash check/info/dump/clear`), auto-report via RTT. Config overlays in `conf/`. |
 | `lib/device_shell/` | Board management shell commands (`board info/uptime/reset`) |
 | `lib/eai_osal/` | OS abstraction layer — portable mutex, semaphore, thread, queue, timer, event, critical section, time primitives. Zephyr backend. |
+| `lib/wifi_prov/` | WiFi provisioning over BLE — custom GATT service, WiFi scan/connect, credential persistence, state machine. See `lib/wifi_prov/CLAUDE.md`. |
 
 ## Testing
 
@@ -128,6 +130,7 @@ python3 ../zephyr/scripts/twister -T lib -p qemu_cortex_m3 -O ../.cache/twister 
 | `libraries.crash_log` | qemu_cortex_m3 | 4 tests (clean boot API behavior) |
 | `libraries.device_shell` | qemu_cortex_m3, native_sim | 3 tests (shell command output) |
 | `libraries.eai_osal` | qemu_cortex_m3 | 44 tests (all OSAL primitives + work queues) |
+| `libraries.wifi_prov` | qemu_cortex_m3 | 22 tests (credentials, message encode/decode, state machine) |
 
 ## Structure
 

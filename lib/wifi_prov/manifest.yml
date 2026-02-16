@@ -1,0 +1,5 @@
+name: wifi_prov
+description: "WiFi provisioning over BLE with credential persistence"
+default_overlays: []
+board_overlays: false
+depends: []
