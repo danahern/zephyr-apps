@@ -1,6 +1,53 @@
-# Linux Applications for STM32MP1 Cortex-A7
+# Linux for STM32MP1 Cortex-A7
 
-Userspace applications for the STM32MP1 A7 core, cross-compiled using Buildroot's toolchain.
+Buildroot-based Linux image and userspace applications for the STM32MP1 A7 core.
+
+## Buildroot SD Card Image
+
+Builds a bootable SD card image using upstream Buildroot's `stm32mp157c_dk2_defconfig`. Includes TF-A, U-Boot, Linux kernel, and a minimal root filesystem.
+
+### Build Image
+
+```bash
+# Build the Docker image (one-time)
+docker build -t stm32mp1-sdk firmware/linux/docker/
+
+# Using linux-build MCP:
+start_container(name="stm32mp1-build", image="stm32mp1-sdk")
+run_command(container, "git clone --depth 1 https://github.com/buildroot/buildroot.git /home/builder/buildroot")
+run_command(container, "make stm32mp157c_dk2_defconfig", workdir="/home/builder/buildroot")
+build(container, command="make -j$(nproc)", workdir="/home/builder/buildroot")
+run_command(container, "cp /home/builder/buildroot/output/images/sdcard.img /artifacts/")
+collect_artifacts(container, host_path="/tmp/stm32mp1-artifacts")
+```
+
+First build takes 30-60 minutes. Subsequent builds are incremental.
+
+### Flash to SD Card
+
+```bash
+# Find your SD card device (DO NOT use your system disk)
+# macOS: diskutil list    Linux: lsblk
+sudo dd if=/tmp/stm32mp1-artifacts/sdcard.img of=/dev/sdX bs=4M status=progress
+sync
+```
+
+### Image Artifacts
+
+| File | Description |
+|------|-------------|
+| `sdcard.img` | Complete SD card image (GPT: TF-A + U-Boot + rootfs) |
+| `tf-a-stm32mp157c-dk2.stm32` | TF-A first-stage bootloader |
+| `fip.bin` | FIP image containing U-Boot |
+| `zImage` | Linux kernel |
+| `stm32mp157c-dk2.dtb` | Device tree blob |
+
+### Boot
+
+1. Insert SD card into the STM32MP157C-DK2
+2. Connect USB-C for power and ST-Link serial console (115200 baud)
+3. Set boot switches to SD card boot (SW1: BOOT0=0, BOOT2=1)
+4. Login: `root` (no password)
 
 ## Apps
 
@@ -71,7 +118,7 @@ linux/
 │   └── rpmsg_echo/       # RPMsg IPC client
 │       ├── main.c
 │       └── Makefile
-├── docker/               # Build environment (managed by other session)
+├── docker/               # Buildroot build environment (Ubuntu 22.04)
 │   └── Dockerfile
 └── README.md             # This file
 ```
