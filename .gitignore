@@ -21,6 +21,7 @@ Thumbs.db
 
 # Clangd cache
 .cache/
+compile_commands.json
 
 # ESP-IDF generated config (track sdkconfig.defaults instead)
 sdkconfig
