@@ -1,0 +1,9 @@
+common:
+  tags:
+    - eai_settings
+tests:
+  libraries.eai_settings:
+    platform_allow:
+      - mps2/an385
+    integration_platforms:
+      - mps2/an385

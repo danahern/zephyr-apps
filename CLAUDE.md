@@ -124,7 +124,9 @@ Each library has its own `CLAUDE.md` with full usage docs. Read it before using.
 |---------|---------|
 | `lib/crash_log/` | Boot-time coredump detection, shell commands (`crash check/info/dump/clear`), auto-report via RTT. Config overlays in `conf/`. |
 | `lib/device_shell/` | Board management shell commands (`board info/uptime/reset`) |
+| `lib/eai_log/` | Portable logging macros — header-only, compiles to Zephyr LOG_*, ESP-IDF ESP_LOG*, or POSIX fprintf. See `lib/eai_log/CLAUDE.md`. |
 | `lib/eai_osal/` | OS abstraction layer — portable mutex, semaphore, thread, queue, timer, event, critical section, time, work queue primitives. Zephyr + FreeRTOS backends. |
+| `lib/eai_settings/` | Portable key-value store — Zephyr Settings, ESP-IDF NVS, and POSIX file backends. See `lib/eai_settings/CLAUDE.md`. |
 | `lib/wifi_prov/` | WiFi provisioning over BLE — custom GATT service, WiFi scan/connect, credential persistence, state machine. See `lib/wifi_prov/CLAUDE.md`. |
 
 ## Testing
@@ -159,6 +161,7 @@ Artifacts land in `apps/<app>/build/<board>/zephyr/zephyr.{elf,hex}`. Flash with
 | `libraries.crash_log` | qemu_cortex_m3 | 4 tests (clean boot API behavior) |
 | `libraries.device_shell` | qemu_cortex_m3, native_sim | 3 tests (shell command output) |
 | `libraries.eai_osal` | qemu_cortex_m3 | 44 tests (all OSAL primitives + work queues) |
+| `libraries.eai_settings` | mps2/an385 | 14 tests (set/get/delete/exists, edge cases) |
 | `libraries.wifi_prov` | qemu_cortex_m3 | 22 tests (credentials, message encode/decode, state machine) |
 
 ### ESP-IDF Tests

@@ -1,0 +1,21 @@
+menuconfig EAI_SETTINGS
+	bool "EAI Settings - Portable Key-Value Store"
+	help
+	  Persistent key-value store abstraction. Backend selected at
+	  compile time: Zephyr Settings, ESP-IDF NVS, or POSIX file-based.
+
+if EAI_SETTINGS
+
+choice EAI_SETTINGS_BACKEND
+	prompt "Settings Backend"
+	default EAI_SETTINGS_BACKEND_ZEPHYR
+
+config EAI_SETTINGS_BACKEND_ZEPHYR
+	bool "Zephyr Settings backend"
+	depends on SETTINGS
+	help
+	  Uses Zephyr Settings subsystem (settings_save_one, settings_load_subtree).
+
+endchoice
+
+endif # EAI_SETTINGS

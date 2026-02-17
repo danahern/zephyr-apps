@@ -1,0 +1,3 @@
+name: eai_log
+description: "Portable logging macros — compiles to native logging on each platform"
+depends: []

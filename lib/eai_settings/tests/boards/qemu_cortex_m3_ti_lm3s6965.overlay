@@ -1,0 +1,17 @@
+/*
+ * Add flash partitions for NVS-backed settings on qemu_cortex_m3.
+ * Flash is 256KB — reserve last 64KB for storage.
+ */
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		storage_partition: partition@30000 {
+			label = "storage";
+			reg = <0x00030000 0x00010000>;
+		};
+	};
+};

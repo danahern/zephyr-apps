@@ -1,0 +1,22 @@
+menuconfig EAI_LOG
+	bool "EAI Log - Portable Logging"
+	help
+	  Header-only logging abstraction. Macros compile to the native
+	  logging system on each platform (Zephyr LOG_*, ESP-IDF ESP_LOG*,
+	  POSIX fprintf).
+
+if EAI_LOG
+
+choice EAI_LOG_BACKEND
+	prompt "Log Backend"
+	default EAI_LOG_BACKEND_ZEPHYR
+
+config EAI_LOG_BACKEND_ZEPHYR
+	bool "Zephyr backend"
+	depends on LOG
+	help
+	  Passthrough to Zephyr LOG_INF/ERR/WRN/DBG macros.
+
+endchoice
+
+endif # EAI_LOG
