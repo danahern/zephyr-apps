@@ -1,0 +1,23 @@
+menuconfig EAI_BLE
+	bool "EAI BLE - Portable BLE GATT Abstraction"
+	help
+	  Declarative BLE GATT service definition with backends for
+	  Zephyr BT, NimBLE, and a POSIX stub for testing.
+
+if EAI_BLE
+
+choice EAI_BLE_BACKEND
+	prompt "BLE Backend"
+	default EAI_BLE_BACKEND_ZEPHYR
+
+config EAI_BLE_BACKEND_ZEPHYR
+	bool "Zephyr BT backend"
+	depends on BT
+	depends on BT_PERIPHERAL
+	depends on BT_GATT_DYNAMIC_DB
+	help
+	  Uses Zephyr Bluetooth with runtime GATT service registration.
+
+endchoice
+
+endif # EAI_BLE

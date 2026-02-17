@@ -1,0 +1,8 @@
+common:
+  tags:
+    - eai_ble
+tests:
+  libraries.eai_ble:
+    build_only: true
+    platform_allow:
+      - nrf52840dk/nrf52840

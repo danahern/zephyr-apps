@@ -1,0 +1,4 @@
+name: eai_ble
+description: "Portable BLE GATT abstraction — declarative service definition with Zephyr, NimBLE, and POSIX backends"
+depends:
+  - eai_log

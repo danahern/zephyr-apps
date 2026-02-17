@@ -124,6 +124,7 @@ Each library has its own `CLAUDE.md` with full usage docs. Read it before using.
 |---------|---------|
 | `lib/crash_log/` | Boot-time coredump detection, shell commands (`crash check/info/dump/clear`), auto-report via RTT. Config overlays in `conf/`. |
 | `lib/device_shell/` | Board management shell commands (`board info/uptime/reset`) |
+| `lib/eai_ble/` | Portable BLE GATT abstraction — declarative service definition with Zephyr BT, NimBLE, and POSIX stub backends. See `lib/eai_ble/CLAUDE.md`. |
 | `lib/eai_log/` | Portable logging macros — header-only, compiles to Zephyr LOG_*, ESP-IDF ESP_LOG*, or POSIX fprintf. See `lib/eai_log/CLAUDE.md`. |
 | `lib/eai_osal/` | OS abstraction layer — portable mutex, semaphore, thread, queue, timer, event, critical section, time, work queue primitives. Zephyr + FreeRTOS backends. |
 | `lib/eai_settings/` | Portable key-value store — Zephyr Settings, ESP-IDF NVS, and POSIX file backends. See `lib/eai_settings/CLAUDE.md`. |
