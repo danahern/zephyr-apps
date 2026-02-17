@@ -1,0 +1,24 @@
+menuconfig EAI_WIFI
+	bool "EAI WiFi - Portable WiFi Connection Manager"
+	help
+	  WiFi scan/connect/disconnect abstraction with backends for
+	  Zephyr net_mgmt, ESP-IDF esp_wifi, and a POSIX stub for testing.
+
+if EAI_WIFI
+
+choice EAI_WIFI_BACKEND
+	prompt "WiFi Backend"
+	default EAI_WIFI_BACKEND_ZEPHYR
+
+config EAI_WIFI_BACKEND_ZEPHYR
+	bool "Zephyr net_mgmt backend"
+	depends on WIFI
+	depends on NETWORKING
+	depends on NET_MGMT
+	depends on NET_MGMT_EVENT
+	help
+	  Uses Zephyr net_mgmt WiFi and IPv4 event callbacks.
+
+endchoice
+
+endif # EAI_WIFI

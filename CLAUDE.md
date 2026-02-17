@@ -128,6 +128,7 @@ Each library has its own `CLAUDE.md` with full usage docs. Read it before using.
 | `lib/eai_log/` | Portable logging macros — header-only, compiles to Zephyr LOG_*, ESP-IDF ESP_LOG*, or POSIX fprintf. See `lib/eai_log/CLAUDE.md`. |
 | `lib/eai_osal/` | OS abstraction layer — portable mutex, semaphore, thread, queue, timer, event, critical section, time, work queue primitives. Zephyr + FreeRTOS backends. |
 | `lib/eai_settings/` | Portable key-value store — Zephyr Settings, ESP-IDF NVS, and POSIX file backends. See `lib/eai_settings/CLAUDE.md`. |
+| `lib/eai_wifi/` | Portable WiFi connection manager — scan, connect, disconnect with Zephyr net_mgmt, ESP-IDF esp_wifi, and POSIX stub backends. See `lib/eai_wifi/CLAUDE.md`. |
 | `lib/wifi_prov/` | WiFi provisioning over BLE — custom GATT service, WiFi scan/connect, credential persistence, state machine. See `lib/wifi_prov/CLAUDE.md`. |
 
 ## Testing

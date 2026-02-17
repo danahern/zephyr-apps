@@ -1,0 +1,4 @@
+name: eai_wifi
+description: "Portable WiFi connection manager — scan, connect, disconnect with Zephyr, ESP-IDF, and POSIX backends"
+depends:
+  - eai_log
