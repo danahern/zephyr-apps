@@ -92,6 +92,27 @@ linux-build.collect_artifacts(container="alif-e7-build", host_path="/tmp/alif-e7
 BOARD=alif-e7 make -C firmware/linux/apps
 ```
 
+## ADB over USB
+
+ADB provides zero-config developer access over USB: `adb shell`, `adb push/pull`, `adb forward`.
+
+The E7 uses a DWC3 USB controller (vs DWC2 on STM32MP1). The meta-eai layer carries:
+- Kernel config fragment (`usb-gadget-adb.cfg`) enabling DWC3 gadget mode + FunctionFS
+- Board-aware gadget script that auto-detects the UDC and sets E7 product strings
+- Machine-conditional DWC3 kernel module dependencies
+
+### Host Setup
+
+```bash
+brew install android-platform-tools
+adb devices    # Shows: eai-alif-e7-001    device
+adb shell      # Root shell on board
+```
+
+### Yocto Config
+
+The E7 `local.conf` includes `android-tools-adbd` and `usb-ecm` packages. The gadget starts at boot via SysVinit (S90).
+
 ## Comparison with STM32MP1
 
 | | STM32MP1 | Alif E7 |
@@ -102,4 +123,5 @@ BOARD=alif-e7 make -C firmware/linux/apps
 | Flash tool | dd to SD | SETOOLS/ATOC |
 | Cross-compiler | Buildroot toolchain | System `arm-linux-gnueabihf-gcc` |
 | CPU flags | `-mcpu=cortex-a7 -mfpu=neon-vfpv4` | `-mcpu=cortex-a32 -mfpu=neon` |
+| USB controller | DWC2 | DWC3 |
 | Yocto machine | `stm32mp1` | `devkit-e8` |

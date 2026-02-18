@@ -1,0 +1,25 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          usb-ecm
+# Required-Start:    $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: USB CDC-ECM gadget network
+### END INIT INFO
+
+case "$1" in
+    start)
+        echo "Starting USB ECM gadget..."
+        /usr/bin/usb-ecm.sh
+        ;;
+    stop)
+        echo "Stopping USB ECM gadget..."
+        UDC=/sys/kernel/config/usb_gadget/g1/UDC
+        [ -f $UDC ] && echo "" > $UDC
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0
