@@ -1,15 +1,22 @@
-# Cross-compilation Makefile for STM32MP1 Cortex-A7
+# Cross-compilation Makefile for Linux Cortex-A apps
 #
-# Uses Buildroot's toolchain from the build container.
-# Set CROSS_COMPILE or TOOLCHAIN_DIR to override.
+# BOARD selects the target:
+#   (default)      STM32MP1 Cortex-A7 via Buildroot toolchain
+#   alif-e7        Alif E7 Cortex-A32 via system cross-compiler
 
-# Buildroot toolchain path (inside container after build)
-TOOLCHAIN_DIR ?= /home/builder/buildroot/output/host/bin
-CROSS_COMPILE ?= $(TOOLCHAIN_DIR)/arm-none-linux-gnueabihf-
+ifeq ($(BOARD),alif-e7)
+  # System cross-compiler (crossbuild-essential-armhf)
+  CROSS_COMPILE ?= arm-linux-gnueabihf-
+  CFLAGS  = -Wall -O2 -mcpu=cortex-a32 -mfpu=neon -mfloat-abi=hard
+else
+  # Buildroot toolchain path (inside container after build)
+  TOOLCHAIN_DIR ?= /home/builder/buildroot/output/host/bin
+  CROSS_COMPILE ?= $(TOOLCHAIN_DIR)/arm-none-linux-gnueabihf-
+  CFLAGS  = -Wall -O2 -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
+endif
 
 CC      = $(CROSS_COMPILE)gcc
 STRIP   = $(CROSS_COMPILE)strip
-CFLAGS  = -Wall -O2 -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
 LDFLAGS =
 
 TARGET  = hello

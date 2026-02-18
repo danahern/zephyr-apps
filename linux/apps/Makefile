@@ -1,7 +1,8 @@
-# Build all A7 Linux apps for STM32MP1
+# Build all Linux apps
 #
-# Run inside the Buildroot container after build completes:
-#   linux-build.build(container, command="make -C /workspace/firmware/linux/apps all install")
+# Pass BOARD= to select target (see app Makefiles for options):
+#   make                        # STM32MP1 (default)
+#   make BOARD=alif-e7          # Alif E7
 
 APPS = hello rpmsg_echo
 
@@ -10,11 +11,11 @@ APPS = hello rpmsg_echo
 all: $(APPS)
 
 $(APPS):
-	$(MAKE) -C $@
+	$(MAKE) -C $@ BOARD=$(BOARD)
 
 install:
 	@for app in $(APPS); do \
-		$(MAKE) -C $$app install; \
+		$(MAKE) -C $$app install BOARD=$(BOARD); \
 	done
 
 clean:

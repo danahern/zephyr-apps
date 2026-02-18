@@ -1,13 +1,20 @@
-# Cross-compilation Makefile for STM32MP1 RPMsg Echo Client
+# Cross-compilation Makefile for Linux RPMsg Echo Client
 #
-# Uses Buildroot's toolchain from the build container.
+# BOARD selects the target:
+#   (default)      STM32MP1 Cortex-A7 via Buildroot toolchain
+#   alif-e7        Alif E7 Cortex-A32 via system cross-compiler
 
-TOOLCHAIN_DIR ?= /home/builder/buildroot/output/host/bin
-CROSS_COMPILE ?= $(TOOLCHAIN_DIR)/arm-none-linux-gnueabihf-
+ifeq ($(BOARD),alif-e7)
+  CROSS_COMPILE ?= arm-linux-gnueabihf-
+  CFLAGS  = -Wall -O2 -mcpu=cortex-a32 -mfpu=neon -mfloat-abi=hard
+else
+  TOOLCHAIN_DIR ?= /home/builder/buildroot/output/host/bin
+  CROSS_COMPILE ?= $(TOOLCHAIN_DIR)/arm-none-linux-gnueabihf-
+  CFLAGS  = -Wall -O2 -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
+endif
 
 CC      = $(CROSS_COMPILE)gcc
 STRIP   = $(CROSS_COMPILE)strip
-CFLAGS  = -Wall -O2 -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
 LDFLAGS =
 
 TARGET  = rpmsg_echo
