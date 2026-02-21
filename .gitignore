@@ -37,3 +37,5 @@ local.conf
 *.bin
 *.hex
 *.map
+linux/alif-e7/setools/app-release-exec-macos/
+linux/apps/display_test/display_test
