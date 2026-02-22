@@ -7,8 +7,8 @@ SRC_URI = "file://usb-ecm.sh \
 
 S = "${WORKDIR}"
 
-RDEPENDS:${PN} = "busybox kernel-module-libcomposite kernel-module-usb-f-fs"
-RDEPENDS:${PN}:append:devkit-e8 = " kernel-module-dwc3 kernel-module-dwc3-of-simple"
+RDEPENDS_${PN} = "busybox"
+RDEPENDS_${PN}_append_devkit-e8 = " kernel-module-dwc3 kernel-module-dwc3-of-simple kernel-module-libcomposite kernel-module-usb-f-fs"
 
 inherit update-rc.d
 

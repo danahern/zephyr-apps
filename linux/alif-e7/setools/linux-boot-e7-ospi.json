@@ -1,0 +1,38 @@
+{
+    "DEVICE": {
+        "disabled": false,
+        "binary": "app-device-config.json",
+        "version": "0.5.00",
+        "signed": true
+    },
+    "TFA": {
+        "disabled": false,
+        "binary": "bl32.bin",
+        "version": "1.0.0",
+        "mramAddress": "0x80002000",
+        "cpu_id": "A32_0",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "DTB": {
+        "disabled": false,
+        "binary": "devkit-e7.dtb",
+        "version": "1.0.0",
+        "mramAddress": "0x80010000",
+        "signed": false
+    },
+    "KERNEL": {
+        "disabled": false,
+        "binary": "xipImage",
+        "version": "1.0.0",
+        "mramAddress": "0xC0800000",
+        "signed": false
+    },
+    "ROOTFS": {
+        "disabled": false,
+        "binary": "rootfs.cramfs-xip",
+        "version": "1.0.0",
+        "mramAddress": "0xC0000000",
+        "signed": false
+    }
+}
