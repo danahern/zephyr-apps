@@ -1,0 +1,22 @@
+{
+    "TFA": {
+        "disabled": true,
+        "binary": "bl32-ospi.bin",
+        "mramAddress": "0x80002000"
+    },
+    "DTB": {
+        "disabled": true,
+        "binary": "appkit-e7-ospi.dtb",
+        "mramAddress": "0x80010000"
+    },
+    "ROOTFS": {
+        "disabled": false,
+        "binary": "rootfs-ospi.bin",
+        "address": "0xC0000000"
+    },
+    "KERNEL": {
+        "disabled": false,
+        "binary": "xipImage-ospi",
+        "address": "0xC0800000"
+    }
+}
