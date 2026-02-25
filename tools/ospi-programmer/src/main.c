@@ -72,9 +72,20 @@ static uint32_t to_flash_addr(uint32_t addr)
     return addr;
 }
 
+static int ospi_initialized;
+
+static int ensure_ospi_init(void)
+{
+    if (!ospi_initialized) {
+        ospi_flash_init();
+        ospi_initialized = 1;
+    }
+    return 0;
+}
+
 static void handle_ping(const cmd_header_t *cmd)
 {
-    /* Respond with firmware version in data */
+    /* Respond with firmware version — no OSPI access needed */
     static const char version[] = "OSPI-RTT v1.0";
     send_response(cmd->cmd_id, STATUS_OK, cmd->seq,
                   version, sizeof(version) - 1);
@@ -82,12 +93,14 @@ static void handle_ping(const cmd_header_t *cmd)
 
 static void handle_read_id(const cmd_header_t *cmd)
 {
+    ensure_ospi_init();
     uint8_t id = ospi_flash_read_id();
     send_response(cmd->cmd_id, STATUS_OK, cmd->seq, &id, 1);
 }
 
 static void handle_erase(const cmd_header_t *cmd)
 {
+    ensure_ospi_init();
     uint32_t flash_addr = to_flash_addr(cmd->addr);
     uint32_t remaining = cmd->length;
     uint32_t sector_size = 0x10000; /* 64KB */
@@ -109,6 +122,7 @@ static void handle_erase(const cmd_header_t *cmd)
 
 static void handle_write(const cmd_header_t *cmd, const uint8_t *data)
 {
+    ensure_ospi_init();
     uint32_t flash_addr = to_flash_addr(cmd->addr);
     uint32_t remaining = cmd->length;
     uint32_t offset = 0;
@@ -139,6 +153,7 @@ static void handle_write(const cmd_header_t *cmd, const uint8_t *data)
 
 static void handle_verify(const cmd_header_t *cmd)
 {
+    ensure_ospi_init();
     uint32_t flash_addr = to_flash_addr(cmd->addr);
     uint32_t length = cmd->length;
 
@@ -158,6 +173,7 @@ static void handle_verify(const cmd_header_t *cmd)
 
 static void handle_read(const cmd_header_t *cmd)
 {
+    ensure_ospi_init();
     uint32_t flash_addr = to_flash_addr(cmd->addr);
     uint32_t length = cmd->length;
 
@@ -183,6 +199,7 @@ static void handle_read(const cmd_header_t *cmd)
 
 static void handle_reset_flash(const cmd_header_t *cmd)
 {
+    ensure_ospi_init();
     ospi_flash_software_reset();
     send_ok(cmd->cmd_id, cmd->seq);
 }
@@ -231,8 +248,8 @@ int main(void)
                                  sizeof(rtt_down_buf),
                                  SEGGER_RTT_MODE_NO_BLOCK_SKIP);
 
-    /* Initialize OSPI flash controller */
-    ospi_flash_init();
+    /* OSPI flash init deferred to first OSPI command (avoid HardFault if
+     * SE hasn't granted M55_HP access to OSPI controller yet) */
 
     /* Main command loop */
     cmd_buf_pos = 0;

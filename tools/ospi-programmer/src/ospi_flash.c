@@ -34,7 +34,10 @@ static void write_padctrl(uint32_t port, uint32_t pin,
     *reg = (pad_val << 16) | alt_func;
 }
 
-static void setup_pinmux(void)
+/* Pinmux setup — only needed if SE device config doesn't configure OSPI1 pins.
+ * Currently unused: SE sets OSPI1 pins via app-device-config.json and
+ * PINMUX_RUNTIME_CFG=0 blocks runtime writes to pinmux registers. */
+static void __attribute__((unused)) setup_pinmux(void)
 {
     /* OSPI1 data lines */
     write_padctrl(9, 5, PAD_CTRL_DATA, 1);
@@ -195,7 +198,8 @@ void ospi_flash_init(void)
     ospi_cfg.ddr_en = 0;
     ospi_cfg.wait_cycles = DEFAULT_WAIT_CYCLES_ISSI;
 
-    setup_pinmux();
+    /* Skip pinmux — SE configures OSPI1 pins from app-device-config.json
+     * (PINMUX_RUNTIME_CFG=0 means pinmux writes are blocked at runtime) */
     ospi_init(&ospi_cfg);
 
     if (issi_flash_probe() == 0) {

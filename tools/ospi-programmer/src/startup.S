@@ -34,6 +34,24 @@ __vectors:
     .thumb_func
     .globl Reset_Handler
 Reset_Handler:
+    /*
+     * Security configuration for Alif E7 M55_HP.
+     *
+     * Constraints discovered through testing:
+     * - ALLNS=1 (SAU_CTRL bit 1) kills JLink debug completely
+     * - NSC=0 covering all memory also kills debug (same effect)
+     * - DSB/ISB stall after ITGU/DTGU/SAU register writes
+     * - DTGU (0xE001F000) writes hang the CPU
+     * - OSPI controller (0x83002000) BusFaults from CPU regardless of
+     *   SAU config (tested: no SAU, ALLNS, split NS regions)
+     * - Debug DAP reads OSPI registers fine — peripheral is accessible
+     *   on AXI bus, but M55_HP CPU goes through EXPMST bridge which
+     *   may not forward 0x8xxx_xxxx addresses without additional config
+     *
+     * Current: SAU disabled (all Secure). OSPI access needs EXPMST
+     * bus master bridge investigation — not a TrustZone issue.
+     */
+
     /* Copy .data from ITCM (load address) to DTCM (run address) */
     ldr r0, =_data_start
     ldr r1, =_data_end
