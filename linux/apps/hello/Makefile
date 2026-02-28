@@ -2,9 +2,9 @@
 #
 # BOARD selects the target:
 #   (default)      STM32MP1 Cortex-A7 via Buildroot toolchain
-#   alif-e7        Alif E7 Cortex-A32 via system cross-compiler
+#   alif-e7/e8     Alif Ensemble Cortex-A32 via system cross-compiler
 
-ifeq ($(BOARD),alif-e7)
+ifneq ($(filter alif-%,$(BOARD)),)
   # System cross-compiler (crossbuild-essential-armhf)
   CROSS_COMPILE ?= arm-linux-gnueabihf-
   CFLAGS  = -Wall -O2 -mcpu=cortex-a32 -mfpu=neon -mfloat-abi=hard

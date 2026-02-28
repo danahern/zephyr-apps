@@ -3,6 +3,7 @@
 # Pass BOARD= to select target (see app Makefiles for options):
 #   make                        # STM32MP1 (default)
 #   make BOARD=alif-e7          # Alif E7
+#   make BOARD=alif-e8          # Alif E8
 
 APPS = hello rpmsg_echo display_test
 

@@ -1,0 +1,7 @@
+{
+    "TFA": {
+        "disabled": false,
+        "binary": "bl32-usb-phy.bin",
+        "mramAddress": "0x80002000"
+    }
+}

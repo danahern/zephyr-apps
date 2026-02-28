@@ -1,0 +1,7 @@
+{
+    "TFA": {
+        "disabled": false,
+        "binary": "bl32-ospi.bin",
+        "mramAddress": "0x80002000"
+    }
+}

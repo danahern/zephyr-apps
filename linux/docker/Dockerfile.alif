@@ -1,0 +1,22 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System cross-compiler for Cortex-A32 (armhf)
+# Shared by all Alif Ensemble boards (E7, E8) — same CPU architecture
+# No Buildroot needed — uses distro-provided arm-linux-gnueabihf-gcc
+RUN dpkg --add-architecture armhf && \
+    apt-get update && apt-get install -y \
+    crossbuild-essential-armhf \
+    libdrm-dev:armhf \
+    file \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash builder \
+    && mkdir -p /artifacts \
+    && chown builder:builder /artifacts
+USER builder
+WORKDIR /home/builder
+
+CMD ["sleep", "infinity"]
