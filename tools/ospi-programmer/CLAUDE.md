@@ -1,10 +1,16 @@
-# OSPI RTT Flash Programmer
+# OSPI RTT Flash Programmer (BROKEN)
 
-Bare-metal M55_HP firmware for high-speed OSPI NOR flash programming via SEGGER RTT.
+Bare-metal M55_HP firmware for OSPI NOR flash programming via SEGGER RTT.
 
-## Purpose
+## Status: BROKEN
 
-Replaces the slow FLM-based JLink OSPI programming (~7 KB/s, ~25 min for 9MB) with direct OSPI flash control over RTT. Expected throughput: ~500 KB/s sustained.
+**M55_HP CPU cannot access the OSPI controller.** Access to 0x83002000 causes IMPRECISERR BusFault (CFSR=0x400) due to the EXPMST0 bus master bridge not forwarding M55_HP CPU accesses to AXI addresses in the 0x8xxx_xxxx range. The debug DAP can access these registers (bypasses EXPMST), but M55_HP CPU code cannot.
+
+Until the EXPMST bridge configuration is resolved, use `jlink_flash` with FLM (~7 KB/s) for OSPI programming.
+
+## Original Purpose
+
+Was intended to replace the slow FLM-based JLink OSPI programming (~7 KB/s) with direct OSPI controller access. The ~500 KB/s speed estimate was never validated on hardware.
 
 ## Architecture
 
