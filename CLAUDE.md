@@ -60,29 +60,6 @@ These patterns should be extracted and reused when building new apps:
 
 ### Module Pattern
 
-When creating new modules, follow this pattern:
-
-```c
-// module.h
-typedef void (*module_event_cb_t)(const uint8_t *data, size_t len);
-int module_init(module_event_cb_t callback);
-int module_send(const uint8_t *data, size_t len);
-
-// module.c
-#include "module.h"
-LOG_MODULE_REGISTER(module, LOG_LEVEL_INF);
-
-static module_event_cb_t event_callback;
-static K_MSGQ_DEFINE(module_queue, sizeof(struct msg), 10, 4);
-
-int module_init(module_event_cb_t callback) {
-    event_callback = callback;
-    // ... setup
-    return 0;
-}
-```
-
-Key principles:
 - Callback-driven events (type-safe function pointers)
 - Static allocation only (`K_MSGQ_DEFINE`, `K_THREAD_STACK_DEFINE`)
 - Each module manages its own state
@@ -174,40 +151,27 @@ Artifacts land in `apps/<app>/build/<board>/zephyr/zephyr.{elf,hex}`. Flash with
 
 ### Native Tests (POSIX)
 
-| Library | Tests | Command |
-|---------|-------|---------|
-| `lib/eai_audio` | 43 tests (core API + mixer) | `cd lib/eai_audio/tests/native && cmake -B build && cmake --build build && ./build/eai_audio_tests` |
-| `lib/eai_sensor` | 25 tests (devices, sessions, read, callback, flush) | `cd lib/eai_sensor/tests/native && cmake -B build && cmake --build build && ./build/eai_sensor_tests` |
-| `lib/eai_display` | 22 tests (devices, layers, write, commit, brightness, vsync) | `cd lib/eai_display/tests/native && cmake -B build && cmake --build build && ./build/eai_display_tests` |
-| `lib/eai_input` | 17 tests (devices, polling, callback, events) | `cd lib/eai_input/tests/native && cmake -B build && cmake --build build && ./build/eai_input_tests` |
+| Library | Tests |
+|---------|-------|
+| `lib/eai_audio` | 43 tests |
+| `lib/eai_sensor` | 25 tests |
+| `lib/eai_display` | 22 tests |
+| `lib/eai_input` | 17 tests |
+
+Build: `cd lib/<name>/tests/native && cmake -B build && cmake --build build && ./build/<name>_tests`
 
 ### ESP-IDF Tests
 
-ESP-IDF tests use Unity framework and run on real ESP32 hardware:
+| Test Project | Tests |
+|-------------|-------|
+| `osal_tests` | 44 tests |
+| `wifi_prov_tests` | 22 tests |
 
-```bash
-cd esp-idf/<test_project>
-idf.py set-target esp32
-idf.py build
-idf.py -p /dev/cu.usbserial-110 flash monitor
-```
-
-| Test Project | Target | Tests |
-|-------------|--------|-------|
-| `osal_tests` | ESP32 | 44 tests (all OSAL FreeRTOS backend primitives) |
-| `wifi_prov_tests` | ESP32 | 22 tests (message encode/decode, state machine, NVS credentials) |
+Build and flash via `esp-idf-build` MCP. See each library's CLAUDE.md for details.
 
 ## Addons
 
-Composable code generation modules in `addons/`. Specified via `create_app(libraries=["ble", "wifi"])` — each addon injects Kconfig, includes, globals, and init code into the generated app.
-
-| Addon | Description |
-|-------|-------------|
-| `ble` | BLE peripheral with NUS — advertising, connection callbacks, NUS echo |
-| `wifi` | WiFi station with DHCP — net_mgmt events, connect/disconnect handlers |
-| `tcp` | TCP client socket — connect, send, receive with dedicated RX thread (depends: wifi) |
-
-Addons vs libraries: **Libraries** (`lib/<name>/manifest.yml`) inject overlay config into CMakeLists.txt. **Addons** (`addons/<name>.yml`) generate code directly into main.c and prj.conf. Both are specified in the `libraries` parameter of `create_app`.
+Composable code generation modules in `addons/` (ble, wifi, tcp). See `zephyr-build.list_templates()` for available addons. Both addons and libraries are specified via `create_app(libraries=[...])`.
 
 ## Structure
 

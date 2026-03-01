@@ -18,17 +18,20 @@ Include in any app where you want interactive device info over RTT. Useful for v
 
 ## How to Include
 
-### 1. Register as a Zephyr module
+### Via create_app (preferred for new apps)
+
+`device_shell` has a `manifest.yml`, so it can be included via:
+```
+zephyr-build.create_app(name="my_app", libraries=["device_shell"])
+```
+This automatically includes the overlay config and CMake module registration.
+
+### Manual integration (existing apps)
 
 ```cmake
 list(APPEND ZEPHYR_EXTRA_MODULES
     ${CMAKE_CURRENT_LIST_DIR}/../../lib/device_shell
 )
-```
-
-### 2. Include the shell overlay
-
-```cmake
 list(APPEND OVERLAY_CONFIG "${CMAKE_CURRENT_LIST_DIR}/../../lib/device_shell/device_shell.conf")
 ```
 
