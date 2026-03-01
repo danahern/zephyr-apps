@@ -114,7 +114,7 @@ west blobs fetch hal_espressif
 
 ## Board Configurations
 
-See workspace `CLAUDE.md` for full board/chip/target_chip mappings. App-specific boards are listed in the Available Apps table above.
+Use `knowledge.board_info("board_name")` or `knowledge.list_boards()` for board/chip/target_chip mappings. App-specific boards are listed in the Available Apps table above.
 
 ## Shared Libraries
 
