@@ -11,18 +11,22 @@ if [ -z "$UDC_NAME" ]; then
     exit 1
 fi
 
-# Detect board from device tree
-if grep -q "Alif" /proc/device-tree/model 2>/dev/null; then
+# Detect board from device tree (model is lowercase, e.g. "appkit-e7")
+if grep -qi "alif\|ensemble\|appkit-e\|devkit-e" /proc/device-tree/model 2>/dev/null; then
     SERIAL="eai-alif-e7-001"
     PRODUCT="Alif E7 Dev Board"
-    # Fixed MAC addresses for stable host-side interface naming
     DEV_MAC="02:00:86:e7:00:01"
     HOST_MAC="02:00:86:e7:00:02"
-else
+elif grep -qi "stm32mp" /proc/device-tree/model 2>/dev/null; then
     SERIAL="eai-stm32mp1-001"
     PRODUCT="STM32MP1 Dev Board"
-    DEV_MAC="02:00:86:mp:00:01"
-    HOST_MAC="02:00:86:mp:00:02"
+    DEV_MAC="02:00:86:a1:00:01"
+    HOST_MAC="02:00:86:a1:00:02"
+else
+    SERIAL="eai-generic-001"
+    PRODUCT="EAI Dev Board"
+    DEV_MAC="02:00:86:00:00:01"
+    HOST_MAC="02:00:86:00:00:02"
 fi
 
 # Load modules (no-op if built-in)
