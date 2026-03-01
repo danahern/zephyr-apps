@@ -1,6 +1,7 @@
 #!/bin/sh
 # USB CDC-ECM gadget — Ethernet over USB
 # Provides network interface for SSH/development access
+# Optionally adds ADB via FunctionFS if adbd is installed
 
 GADGET=/sys/kernel/config/usb_gadget/g1
 
@@ -29,9 +30,15 @@ else
     HOST_MAC="02:00:86:00:00:02"
 fi
 
+ADB_ENABLED=0
+if [ -x /usr/bin/adbd ]; then
+    ADB_ENABLED=1
+fi
+
 # Load modules (no-op if built-in)
 modprobe libcomposite 2>/dev/null
 modprobe usb_f_ecm 2>/dev/null
+[ "$ADB_ENABLED" = "1" ] && modprobe usb_f_fs 2>/dev/null
 
 # Mount configfs
 mount -t configfs none /sys/kernel/config 2>/dev/null
@@ -49,18 +56,51 @@ echo "$SERIAL" > $GADGET/strings/0x409/serialnumber
 echo "EAI" > $GADGET/strings/0x409/manufacturer
 echo "$PRODUCT" > $GADGET/strings/0x409/product
 
-# CDC-ECM function
+# Create ALL functions before linking any to config
 mkdir -p $GADGET/functions/ecm.usb0
 echo "$DEV_MAC" > $GADGET/functions/ecm.usb0/dev_addr
 echo "$HOST_MAC" > $GADGET/functions/ecm.usb0/host_addr
 
-# Configuration
+if [ "$ADB_ENABLED" = "1" ]; then
+    mkdir -p $GADGET/functions/ffs.adb
+fi
+
+# Configuration — link all functions
 mkdir -p $GADGET/configs/c.1/strings/0x409
-echo "CDC-ECM" > $GADGET/configs/c.1/strings/0x409/configuration
 echo 250 > $GADGET/configs/c.1/MaxPower
 ln -sf $GADGET/functions/ecm.usb0 $GADGET/configs/c.1/
 
-# Bind UDC
+if [ "$ADB_ENABLED" = "1" ]; then
+    ln -sf $GADGET/functions/ffs.adb $GADGET/configs/c.1/
+    echo "CDC-ECM + ADB" > $GADGET/configs/c.1/strings/0x409/configuration
+
+    # Mount FunctionFS for adbd
+    mkdir -p /dev/usb-ffs/adb
+    mount -t functionfs adb /dev/usb-ffs/adb
+
+    # Ensure devpts is mounted (adbd needs /dev/pts for shell)
+    mount -t devpts devpts /dev/pts 2>/dev/null
+
+    # Start adbd — it writes USB descriptors to ep0
+    /usr/bin/adbd &
+
+    # Wait for adbd to write descriptors (ep1 appears when ready)
+    TIMEOUT=5
+    while [ ! -e /dev/usb-ffs/adb/ep1 ] && [ $TIMEOUT -gt 0 ]; do
+        sleep 1
+        TIMEOUT=$((TIMEOUT - 1))
+    done
+
+    if [ -e /dev/usb-ffs/adb/ep1 ]; then
+        echo "usb-gadget: ADB ready"
+    else
+        echo "usb-gadget: ADB timeout, continuing without ADB"
+    fi
+else
+    echo "CDC-ECM" > $GADGET/configs/c.1/strings/0x409/configuration
+fi
+
+# Bind UDC (after adbd writes descriptors, if applicable)
 echo "$UDC_NAME" > $GADGET/UDC
 
 # Configure network interface

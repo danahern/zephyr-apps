@@ -1,0 +1,92 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          overlayfs-dev
+# Required-Start:    $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: OverlayFS writable layer over cramfs rootfs
+### END INIT INFO
+
+# Mount an overlayfs over / so adb push works on read-only rootfs.
+# Tries persistent JFFS2-on-MRAM first, falls back to volatile tmpfs.
+
+OVERLAY_MNT=/tmp/.overlay
+OVERLAY_UPPER=$OVERLAY_MNT/upper
+OVERLAY_WORK=$OVERLAY_MNT/work
+
+# Find an MTD device created by phram (named "mram_overlay")
+find_mram_mtd() {
+    for mtd in /sys/class/mtd/mtd*; do
+        [ -d "$mtd" ] || continue
+        name=$(cat "$mtd/name" 2>/dev/null)
+        if [ "$name" = "mram_overlay" ]; then
+            echo "${mtd##*/}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+mount_persistent() {
+    mtd_name=$(find_mram_mtd) || return 1
+    mtd_dev="/dev/${mtd_name}"
+    mtdblock_dev="/dev/mtdblock${mtd_name#mtd}"
+
+    [ -e "$mtdblock_dev" ] || return 1
+
+    mkdir -p "$OVERLAY_MNT"
+    if mount -t jffs2 "$mtdblock_dev" "$OVERLAY_MNT" 2>/dev/null; then
+        mkdir -p "$OVERLAY_UPPER" "$OVERLAY_WORK"
+        echo "overlayfs-dev: persistent JFFS2 on MRAM ($mtd_dev)"
+        return 0
+    fi
+
+    echo "overlayfs-dev: JFFS2 mount failed on $mtdblock_dev, erasing and retrying"
+    # First use — erase MRAM region for clean JFFS2
+    if [ -e "$mtd_dev" ]; then
+        dd if=/dev/zero of="$mtdblock_dev" bs=4096 2>/dev/null
+        if mount -t jffs2 "$mtdblock_dev" "$OVERLAY_MNT" 2>/dev/null; then
+            mkdir -p "$OVERLAY_UPPER" "$OVERLAY_WORK"
+            echo "overlayfs-dev: persistent JFFS2 on MRAM (initialized)"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+mount_volatile() {
+    mount -t tmpfs tmpfs /tmp 2>/dev/null
+    mkdir -p "$OVERLAY_UPPER" "$OVERLAY_WORK"
+    echo "overlayfs-dev: volatile tmpfs (changes lost on reboot)"
+}
+
+case "$1" in
+    start)
+        # Skip if rootfs is already writable
+        if touch /.rw_test 2>/dev/null; then
+            rm -f /.rw_test
+            echo "overlayfs-dev: rootfs already writable, skipping"
+            exit 0
+        fi
+
+        # Try persistent MRAM, fall back to tmpfs
+        mount_persistent || mount_volatile
+
+        mount -t overlay overlay \
+            -o lowerdir=/,upperdir=$OVERLAY_UPPER,workdir=$OVERLAY_WORK \
+            / 2>/dev/null
+
+        if [ $? -eq 0 ]; then
+            echo "overlayfs-dev: writable overlay active"
+        else
+            echo "overlayfs-dev: overlay mount failed (kernel support missing?)"
+        fi
+        ;;
+    stop)
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0

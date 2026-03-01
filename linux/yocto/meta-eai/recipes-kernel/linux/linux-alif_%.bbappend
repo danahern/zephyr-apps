@@ -1,3 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += "file://usb-gadget-adb.cfg"
+SRC_URI += "file://overlayfs.cfg"
+SRC_URI += "file://jffs2.cfg"
 #SRC_URI += "file://display-drm.cfg"
