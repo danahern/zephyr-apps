@@ -1,0 +1,30 @@
+{
+    "DEVICE": {
+        "disabled": false,
+        "binary": "app-device-config.json",
+        "version": "0.5.00",
+        "signed": true
+    },
+    "BOOTLOAD": {
+        "disabled": false,
+        "binary": "bl32-ospi.bin",
+        "version": "1.0.0",
+        "mramAddress": "0x80002000",
+        "cpu_id": "A32_0",
+        "flags": ["boot"],
+        "signed": false,
+        "_comment": "bl32-ospi.bin = BASE_IMAGES3 bl32 — boots kernel from OSPI 0xC0800000 instead of MRAM 0x80020000"
+    },
+    "DTB": {
+        "disabled": false,
+        "binary": "devkit-e8-ospi-phram.dtb",
+        "version": "1.0.0",
+        "mramAddress": "0x80010000",
+        "signed": false,
+        "_comment": "phram bootargs: phram=ospi_root,0xC0000000,0x2F0000 root=mtd:ospi_root — mounts cramfs from OSPI"
+    },
+    "_ospi_layout": {
+        "cramfs":   "0xC0000000  (3MB, physmap XIP via phram driver)",
+        "xipImage": "0xC0800000  (4MB, executed in place by bl32-ospi)"
+    }
+}
