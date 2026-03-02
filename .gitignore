@@ -44,3 +44,4 @@ linux/alif-e7/setools/*.dtb
 linux/alif-e7/setools/xipImage
 linux/alif-e7/setools/*.cramfs-xip
 linux/apps/display_test/display_test
+!linux/alif-e8/setools/bl32-ospi.bin
