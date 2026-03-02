@@ -5,7 +5,7 @@
         "mramAddress": "0x80002000"
     },
     "DTB": {
-        "disabled": true,
+        "disabled": false,
         "binary": "appkit-e7-ospi.dtb",
         "mramAddress": "0x80010000"
     },
